@@ -54,15 +54,18 @@
 /*
  *
  */
+#define TEC_FORMAT_VERSION_0      '0'
+#define TEC_FORMAT_VERSION_1      '0'
+#define TEC_FORMAT_VERSION_2      '1'
 #define TEC_REC_ID_MAX_LENGTH      16
-
+/* Data type flag */
 #define IEEE_SINGLE_PRECISION_REAL 0
 #define IEEE_DOUBLE_PRECISION_REAL 1
 #define INTEL_16BIT_INTEGER        2
 #define INTEL_32BIT_INTEGER        3
 #define SPARC_16BIT_INTEGER        4
 #define SPARC_32BIT_INTEGER        5
-
+/* */
 #define	STA_CODE_LEN      8    /* SEED: 5 chars plus terminating NULL & 2 paddings */
 #define	NET_CODE_LEN      3    /* SEED: 2 chars plus terminating NULL */
 #define	CHAN_CODE_LEN     4    /* SEED: 3 chars plus terminating NULL */
@@ -139,3 +142,11 @@ typedef struct {
 //	size_t          file_size;  /* */
 //	time_t          timestamp;  /* */
 //} TEC_FILE_DESC;
+TEC_REC_HEADER *enrich_tec_rec_header(
+	TEC_REC_HEADER *, const char *, const uint8_t, const time_t, const int,
+	const int, const double, const double, const double, const double
+);
+TEC_CHAN_INFO_BLOCK *enrich_tec_chan_info( TEC_CHAN_INFO_BLOCK *, const char *, const float );
+void *compose_channels_data(
+	void *, const int, const int, const uint8_t, const float *, const float *, const float *
+);

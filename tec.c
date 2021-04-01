@@ -2,34 +2,19 @@
  *
  */
 
-#define _GNU_SOURCE
 /* */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
-#include <search.h>
-#include <time.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
 
 /* */
-#include <tec.h>
-
-/* */
-static TEC_REC_HEADER *enrich_tec_rec_header(
-	TEC_REC_HEADER *, const char *, const uint8_t, const time_t, const int, const int,
-	const double, const double, const double, const double
-);
-
+#include "tec.h"
 
 /*
  * enrich_tec_rec_header() -
  */
-static TEC_REC_HEADER *enrich_tec_rec_header(
+TEC_REC_HEADER *enrich_tec_rec_header(
 	TEC_REC_HEADER *header,
 	const char     *id,
 	const uint8_t   data_type,
@@ -47,9 +32,9 @@ static TEC_REC_HEADER *enrich_tec_rec_header(
 	header->rec_length    = rec_length;
 	header->rec_stations  = rec_stations;
 /* */
-	header->version[0] = '0';
-	header->version[1] = '0';
-	header->version[2] = '1';
+	header->version[0] = TEC_FORMAT_VERSION_0;
+	header->version[1] = TEC_FORMAT_VERSION_1;
+	header->version[2] = TEC_FORMAT_VERSION_2;
 /* */
 	header->ev_origin    = ev_origin;
 	header->ev_longitude = ev_longitude;
@@ -62,7 +47,7 @@ static TEC_REC_HEADER *enrich_tec_rec_header(
 /*
  * enrich_tec_rec_header() -
  */
-static TEC_STA_INFO_BLOCK *enrich_tec_sta_info(
+TEC_STA_INFO_BLOCK *enrich_tec_sta_info(
 	TEC_STA_INFO_BLOCK *stainfo,
 	const char     *sta,
 	const char     *net,
@@ -86,9 +71,9 @@ static TEC_STA_INFO_BLOCK *enrich_tec_sta_info(
 }
 
 /*
- * enrich_tec_rec_header() -
+ * enrich_tec_sta_pick_info() -
  */
-static TEC_STA_INFO_BLOCK *enrich_tec_sta_pick_info(
+TEC_STA_INFO_BLOCK *enrich_tec_sta_pick_info(
 	TEC_STA_INFO_BLOCK *stainfo,
 	const float         p_arrival,
 	const float         p_weight,
@@ -101,4 +86,42 @@ static TEC_STA_INFO_BLOCK *enrich_tec_sta_pick_info(
 	stainfo->s_weight  = s_weight;
 
 	return stainfo;
+}
+
+/*
+ * enrich_tec_rec_header() -
+ */
+TEC_CHAN_INFO_BLOCK *enrich_tec_chan_info(
+	TEC_CHAN_INFO_BLOCK *chaninfo,
+	const char          *chan,
+	const float          scaling
+) {
+	strncpy(chaninfo->chan, chan, CHAN_CODE_LEN);
+	chaninfo->scaling = scaling;
+
+	return chaninfo;
+}
+
+/*
+ *
+ */
+void *compose_channels_data(
+	void         *buffer,
+	const int     channels,
+	const int     samples,
+	const uint8_t data_type,
+	const float  *data_0,
+	const float  *data_1,
+	const float  *data_2
+) {
+	int    i;
+	float *bufptr = (float *)buffer;
+
+	for ( i = 0; i < samples; i++ ) {
+		*bufptr++ = *data_0++;
+		*bufptr++ = *data_1++;
+		*bufptr++ = *data_2++;
+	}
+
+	return buffer;
 }
